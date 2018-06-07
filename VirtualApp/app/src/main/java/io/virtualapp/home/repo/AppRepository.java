@@ -37,6 +37,7 @@ public class AppRepository implements AppDataSource {
     private static final List<String> SCAN_PATH_LIST = Arrays.asList(
             ".",
             "wandoujia/app",
+            "Download/",
             "tencent/tassistant/apk",
             "BaiduAsa9103056",
             "360Download",
