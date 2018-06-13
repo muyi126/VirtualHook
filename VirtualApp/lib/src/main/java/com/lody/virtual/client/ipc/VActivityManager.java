@@ -73,6 +73,7 @@ public class VActivityManager {
         if (userId < 0) {
             return ActivityManagerCompat.START_NOT_CURRENT_USER_ACTIVITY;
         }
+        //包装Intent 隐藏真实className
         ActivityInfo info = VirtualCore.get().resolveActivityInfo(intent, userId);
         if (info == null) {
             return ActivityManagerCompat.START_INTENT_NOT_RESOLVED;

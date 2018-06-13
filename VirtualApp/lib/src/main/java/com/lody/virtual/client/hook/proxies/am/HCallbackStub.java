@@ -8,6 +8,7 @@ import android.content.pm.ServiceInfo;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.util.Log;
 
 import com.lody.virtual.client.VClientImpl;
 import com.lody.virtual.client.core.VirtualCore;
@@ -22,6 +23,8 @@ import com.lody.virtual.remote.StubActivityRecord;
 import mirror.android.app.ActivityManagerNative;
 import mirror.android.app.ActivityThread;
 import mirror.android.app.IActivityManager;
+
+import static com.lody.virtual.os.VEnvironment.PR_TAG;
 
 /**
      * @author Lody
@@ -97,6 +100,7 @@ import mirror.android.app.IActivityManager;
         }
 
         private boolean handleLaunchActivity(Message msg) {
+            Log.i(PR_TAG,"handleLaunchActivity");
             Object r = msg.obj;
             Intent stubIntent = ActivityThread.ActivityClientRecord.intent.get(r);
             StubActivityRecord saveInstance = new StubActivityRecord(stubIntent);
@@ -116,6 +120,7 @@ import mirror.android.app.IActivityManager;
                 getH().sendMessageAtFrontOfQueue(Message.obtain(msg));
                 return false;
             }
+            //已经调用过了VClientImpl的bindApplicationNoCheck
             if (!VClientImpl.get().isBound()) {
                 VClientImpl.get().bindApplication(info.packageName, info.processName);
                 getH().sendMessageAtFrontOfQueue(Message.obtain(msg));

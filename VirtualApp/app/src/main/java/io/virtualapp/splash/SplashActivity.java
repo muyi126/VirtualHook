@@ -3,6 +3,7 @@ package io.virtualapp.splash;
 import android.os.Bundle;
 import android.view.WindowManager;
 
+import com.lody.virtual.client.NativeEngine;
 import com.lody.virtual.client.core.VirtualCore;
 
 import io.virtualhook.R;
@@ -40,5 +41,6 @@ public class SplashActivity extends VActivity {
         if (!VirtualCore.get().isEngineLaunched()) {
             VirtualCore.get().waitForEngine();
         }
+
     }
 }

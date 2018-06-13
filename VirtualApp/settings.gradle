@@ -1,1 +1,6 @@
+//include ':YAHFA'
+include ':YAHFA:library'
 include ':lib', ':app', ':demoHookPlugin'
+//printf("%s",new File(settingsDir,'../YAHFA').path)
+
+

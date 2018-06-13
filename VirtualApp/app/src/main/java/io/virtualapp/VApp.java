@@ -4,9 +4,11 @@ import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Build;
+
 import com.lody.virtual.client.NativeEngine;
 import com.lody.virtual.client.core.VirtualCore;
 import com.lody.virtual.client.stub.VASettings;
+import com.lody.virtual.configs.ConfigControlHandler;
 
 import io.virtualapp.delegate.MyAppRequestListener;
 import io.virtualapp.delegate.MyComponentDelegate;
@@ -34,6 +36,7 @@ public class VApp extends Application {
         VASettings.ENABLE_INNER_SHORTCUT = false;
         try {
             VirtualCore.get().startup(base);
+            initConfig(mPreferences);
             NativeEngine.nativeHookExec(Build.VERSION.SDK_INT);
         } catch (Throwable e) {
             e.printStackTrace();
@@ -81,4 +84,10 @@ public class VApp extends Application {
         return getApp().mPreferences;
     }
 
+
+    private void initConfig(SharedPreferences sharedPreferences){
+        ConfigControlHandler.ConfigControl configControl = ConfigControlHandler.getInstance().readFile("all");
+        ConfigControlHandler.getInstance().putAppConfigControl("all",configControl);
+        ConfigControlHandler.getInstance().saveFile();
+    }
 }

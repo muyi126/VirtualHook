@@ -29,10 +29,12 @@ import com.lody.virtual.client.stub.ChooseTypeAndAccountActivity;
 import com.lody.virtual.os.VUserInfo;
 import com.lody.virtual.os.VUserManager;
 
+import java.io.FileInputStream;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.virtualapp.vs.VSManagerActivity;
 import io.virtualhook.R;
 import io.virtualapp.VCommends;
 import io.virtualapp.abs.nestedadapter.SmartRecyclerAdapter;
@@ -101,40 +103,8 @@ public class HomeActivity extends VActivity implements HomeContract.HomeView {
         mPopupMenu = new PopupMenu(new ContextThemeWrapper(this, R.style.Theme_AppCompat_Light), mMenuView);
         Menu menu = mPopupMenu.getMenu();
         setIconEnable(menu, true);
-        menu.add("Accounts").setIcon(R.drawable.ic_account).setOnMenuItemClickListener(item -> {
-            List<VUserInfo> users = VUserManager.get().getUsers();
-            List<String> names = new ArrayList<>(users.size());
-            for (VUserInfo info : users) {
-                names.add(info.name);
-            }
-            CharSequence[] items = new CharSequence[names.size()];
-            for (int i = 0; i < names.size(); i++) {
-                items[i] = names.get(i);
-            }
-            new AlertDialog.Builder(this)
-                    .setTitle("Please select an user")
-                    .setItems(items, (dialog, which) -> {
-                        VUserInfo info = users.get(which);
-                        Intent intent = new Intent(this, ChooseTypeAndAccountActivity.class);
-                        intent.putExtra(ChooseTypeAndAccountActivity.KEY_USER_ID, info.id);
-                        startActivity(intent);
-                    }).show();
-            return false;
-        });
-        menu.add("Virtual Storage").setIcon(R.drawable.ic_vs).setOnMenuItemClickListener(item -> {
-            Toast.makeText(this, "The coming", Toast.LENGTH_SHORT).show();
-            return false;
-        });
-        menu.add("Notification").setIcon(R.drawable.ic_notification).setOnMenuItemClickListener(item -> {
-            Toast.makeText(this, "The coming", Toast.LENGTH_SHORT).show();
-            return false;
-        });
-        menu.add("Virtual Location").setIcon(R.drawable.ic_notification).setOnMenuItemClickListener(item -> {
-            startActivity(new Intent(this, VirtualLocationSettings.class));
-            return true;
-        });
         menu.add("Settings").setIcon(R.drawable.ic_settings).setOnMenuItemClickListener(item -> {
-            Toast.makeText(this, "The coming", Toast.LENGTH_SHORT).show();
+            VSManagerActivity.goManager(this);
             return false;
         });
         mMenuView.setOnClickListener(v -> mPopupMenu.show());

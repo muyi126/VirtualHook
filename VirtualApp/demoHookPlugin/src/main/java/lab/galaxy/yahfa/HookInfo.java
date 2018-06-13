@@ -11,7 +11,7 @@ public class HookInfo {
     public static String[] hookItemNames = {
         "lab.galaxy.demeHookPlugin.Hook_AssetManager_open",
         "lab.galaxy.demeHookPlugin.Hook_URL_openConnection",
-        "lab.galaxy.demeHookPlugin.Hook_File_init",
+//        "lab.galaxy.demeHookPlugin.Hook_File_init",
         "lab.galaxy.demeHookPlugin.Hook_TelephonyManager_getDeviceId"
     };
 }

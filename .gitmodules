@@ -1,0 +1,3 @@
+[submodule "VirtualApp/YAHFA"]
+	path = VirtualApp/YAHFA
+	url = https://github.com/rk700/YAHFA.git

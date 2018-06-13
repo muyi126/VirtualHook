@@ -10,6 +10,7 @@ import android.util.Log;
 import com.lody.virtual.client.core.VirtualCore;
 import com.lody.virtual.client.env.VirtualRuntime;
 import com.lody.virtual.client.ipc.VActivityManager;
+import com.lody.virtual.configs.ConfigControlHandler;
 import com.lody.virtual.helper.compat.BuildCompat;
 import com.lody.virtual.helper.utils.VLog;
 import com.lody.virtual.os.VUserHandle;
@@ -277,4 +278,6 @@ public class NativeEngine {
     }
 
     public static native void nativeHookExec(int apiLevel);
+
+    public static native void nativeInvalidateConfig(String packageName);
 }

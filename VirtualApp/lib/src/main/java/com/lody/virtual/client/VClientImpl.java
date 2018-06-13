@@ -1,6 +1,7 @@
 package com.lody.virtual.client;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.Application;
 import android.app.Instrumentation;
 import android.content.BroadcastReceiver;
@@ -15,6 +16,7 @@ import android.content.pm.ProviderInfo;
 import android.content.res.Configuration;
 import android.os.Binder;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.ConditionVariable;
 import android.os.Handler;
 import android.os.IBinder;
@@ -42,6 +44,7 @@ import com.lody.virtual.client.ipc.VDeviceManager;
 import com.lody.virtual.client.ipc.VPackageManager;
 import com.lody.virtual.client.ipc.VirtualStorageManager;
 import com.lody.virtual.client.stub.VASettings;
+import com.lody.virtual.configs.ConfigControlHandler;
 import com.lody.virtual.helper.compat.BuildCompat;
 import com.lody.virtual.helper.compat.NativeLibraryHelperCompat;
 import com.lody.virtual.helper.compat.StorageManagerCompat;
@@ -84,6 +87,7 @@ import mirror.com.android.internal.content.ReferrerIntent;
 import mirror.dalvik.system.VMRuntime;
 import mirror.java.lang.ThreadGroupN;
 
+import static com.lody.virtual.os.VEnvironment.PR_TAG;
 import static com.lody.virtual.os.VEnvironment.ensureCreated;
 import static com.lody.virtual.os.VUserHandle.getUserId;
 
@@ -95,6 +99,7 @@ public final class VClientImpl extends IVClient.Stub {
 
     private static final int NEW_INTENT = 11;
     private static final int RECEIVER = 12;
+    private int mFinalCount;
 
     private static final String TAG = VClientImpl.class.getSimpleName();
     @SuppressLint("StaticFieldLeak")
@@ -223,6 +228,7 @@ public final class VClientImpl extends IVClient.Stub {
     }
 
     private void bindApplicationNoCheck(String packageName, String processName, ConditionVariable lock) {
+        Log.i(PR_TAG,"VCL  bindApplicationNoCheck "+get().toString());
         VDeviceInfo deviceInfo = getDeviceInfo();
         if (processName == null) {
             processName = packageName;
@@ -271,6 +277,7 @@ public final class VClientImpl extends IVClient.Stub {
         NativeEngine.launchEngine();
         Object mainThread = VirtualCore.mainThread();
         NativeEngine.startDexOverride();
+
         Context context = createPackageContext(data.appInfo.packageName);
         System.setProperty("java.io.tmpdir", context.getCacheDir().getAbsolutePath());
         File codeCacheDir;
@@ -332,6 +339,8 @@ public final class VClientImpl extends IVClient.Stub {
             mTempLock = null;
         }
         VirtualCore.get().getComponentDelegate().beforeApplicationCreate(mInitialApplication);
+        //读取配置文件
+        activityLifecycleCallbacks(mInitialApplication);
         try {
             mInstrumentation.callApplicationOnCreate(mInitialApplication);
             InvocationStubManager.getInstance().checkEnv(HCallbackStub.class);
@@ -352,7 +361,8 @@ public final class VClientImpl extends IVClient.Stub {
         VActivityManager.get().appDoneExecuting();
 
         ClassLoader targetClassLoader = mInitialApplication.getClassLoader();
-
+        ConfigControlHandler.getInstance().readFile("all");
+        NativeEngine.nativeInvalidateConfig("all");
         try {
             for(String pluginName : VPackageManager.get().getInstalledHookPlugins()) {
                 VLog.w("VirtualHook", "Applying hook "+pluginName);
@@ -376,6 +386,56 @@ public final class VClientImpl extends IVClient.Stub {
 
         VirtualCore.get().getComponentDelegate().afterApplicationCreate(mInitialApplication);
     }
+
+    private void activityLifecycleCallbacks(Application application){
+        application.registerActivityLifecycleCallbacks(new Application.ActivityLifecycleCallbacks() {
+            @Override
+            public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
+
+            }
+
+            @Override
+            public void onActivityStarted(Activity activity) {
+                mFinalCount++;
+                //如果mFinalCount ==1，说明是从后台到前台
+                if (mFinalCount == 1){
+                    //说明从后台回到了前台
+                    ConfigControlHandler.getInstance().readFile("all");
+                }
+            }
+
+            @Override
+            public void onActivityResumed(Activity activity) {
+
+            }
+
+            @Override
+            public void onActivityPaused(Activity activity) {
+
+            }
+
+            @Override
+            public void onActivityStopped(Activity activity) {
+                mFinalCount--;
+                //如果mFinalCount ==0，说明是前台到后台
+                if (mFinalCount == 0){
+                    //说明从前台回到了后台
+                    ConfigControlHandler.getInstance().readFile("all");
+                }
+            }
+
+            @Override
+            public void onActivitySaveInstanceState(Activity activity, Bundle outState) {
+
+            }
+
+            @Override
+            public void onActivityDestroyed(Activity activity) {
+
+            }
+        });
+    }
+
 
     private void fixWeChatRecovery(Application app) {
         try {

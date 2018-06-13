@@ -25,6 +25,11 @@ android {
             path file("src/main/jni/Android.mk")
         }
     }
+    sourceSets {
+        main {
+            jniLibs.srcDirs = ['src/main/jni']
+        }
+    }
     lintOptions {
         //IJobService need NewApi
         warning 'NewApi','OnClick'
@@ -34,5 +39,5 @@ android {
 
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
-    compile project(':YAHFA')
+    compile project(':YAHFA:library')
 }

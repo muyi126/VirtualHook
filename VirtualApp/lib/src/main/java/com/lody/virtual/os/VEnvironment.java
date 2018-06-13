@@ -17,6 +17,7 @@ import java.io.File;
 public class VEnvironment {
 
     private static final String TAG = VEnvironment.class.getSimpleName();
+    public static final String PR_TAG = "PR";
 
     private static final File ROOT;
     private static final File DATA_DIRECTORY;
@@ -98,6 +99,10 @@ public class VEnvironment {
 
     public static File getPackageListFile() {
         return new File(getSystemSecureDirectory(), "packages.ini");
+    }
+
+    public static File getConfigFile() {
+        return new File(getSystemSecureDirectory(), "config.ini");
     }
 
     /**

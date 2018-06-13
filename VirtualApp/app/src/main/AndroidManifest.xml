@@ -28,6 +28,11 @@
             android:theme="@style/UITheme"/>
 
         <activity
+            android:name="io.virtualapp.vs.VSManagerActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/UITheme"/>
+
+        <activity
             android:name="io.virtualapp.home.ListAppActivity"
             android:screenOrientation="portrait"
             android:theme="@style/UITheme"/>

@@ -27,6 +27,7 @@ import android.os.Parcel;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.util.Log;
 
 import com.lody.virtual.client.IVClient;
 import com.lody.virtual.client.core.VirtualCore;
@@ -69,6 +70,7 @@ import mirror.android.app.IServiceConnectionO;
 
 import static android.os.Process.killProcess;
 import static com.lody.virtual.os.VBinder.getCallingPid;
+import static com.lody.virtual.os.VEnvironment.PR_TAG;
 import static com.lody.virtual.os.VUserHandle.getUserId;
 
 /**
@@ -109,6 +111,7 @@ public class VActivityManagerService implements IActivityManager {
     }
 
     public void onCreate(Context context) {
+        Log.i(PR_TAG,"AMS onCreate");
         AttributeCache.init(context);
         PackageManager pm = context.getPackageManager();
         PackageInfo packageInfo = null;
@@ -129,6 +132,7 @@ public class VActivityManagerService implements IActivityManager {
 
     @Override
     public int startActivity(Intent intent, ActivityInfo info, IBinder resultTo, Bundle options, String resultWho, int requestCode, int userId) {
+        Log.i(PR_TAG,"AMS startActivity");
         synchronized (this) {
             return mMainStack.startActivityLocked(userId, intent, info, resultTo, options, resultWho, requestCode);
         }
@@ -136,6 +140,7 @@ public class VActivityManagerService implements IActivityManager {
 
     @Override
     public int startActivities(Intent[] intents, String[] resolvedTypes, IBinder token, Bundle options, int userId) {
+        Log.i(PR_TAG,"AMS startActivities");
         synchronized (this) {
             ActivityInfo[] infos = new ActivityInfo[intents.length];
             for (int i = 0; i < intents.length; i++) {
@@ -152,6 +157,7 @@ public class VActivityManagerService implements IActivityManager {
 
     @Override
     public String getPackageForIntentSender(IBinder binder) {
+        Log.i(PR_TAG,"AMS getPackageForIntentSender");
         PendingIntentData data = mPendingIntents.getPendingIntent(binder);
         if (data != null) {
             return data.creator;
@@ -162,26 +168,31 @@ public class VActivityManagerService implements IActivityManager {
 
     @Override
     public PendingIntentData getPendingIntent(IBinder binder) {
+        Log.i(PR_TAG,"AMS getPendingIntent");
         return mPendingIntents.getPendingIntent(binder);
     }
 
     @Override
     public void addPendingIntent(IBinder binder, String creator) {
+        Log.i(PR_TAG,"AMS addPendingIntent");
         mPendingIntents.addPendingIntent(binder, creator);
     }
 
     @Override
     public void removePendingIntent(IBinder binder) {
+        Log.i(PR_TAG,"AMS removePendingIntent");
         mPendingIntents.removePendingIntent(binder);
     }
 
     @Override
     public int getSystemPid() {
+        Log.i(PR_TAG,"AMS getSystemPid");
         return VirtualCore.get().myUid();
     }
 
     @Override
     public void onActivityCreated(ComponentName component, ComponentName caller, IBinder token, Intent intent, String affinity, int taskId, int launchMode, int flags) {
+        Log.i(PR_TAG,"AMS onActivityCreated");
         int pid = Binder.getCallingPid();
         ProcessRecord targetApp = findProcessLocked(pid);
         if (targetApp != null) {
@@ -191,27 +202,32 @@ public class VActivityManagerService implements IActivityManager {
 
     @Override
     public void onActivityResumed(int userId, IBinder token) {
+        Log.i(PR_TAG,"AMS onActivityResumed");
         mMainStack.onActivityResumed(userId, token);
     }
 
     @Override
     public boolean onActivityDestroyed(int userId, IBinder token) {
+        Log.i(PR_TAG,"AMS onActivityDestroyed");
         ActivityRecord r = mMainStack.onActivityDestroyed(userId, token);
         return r != null;
     }
 
     @Override
     public AppTaskInfo getTaskInfo(int taskId) {
+        Log.i(PR_TAG,"AMS AppTaskInfo");
         return mMainStack.getTaskInfo(taskId);
     }
 
     @Override
     public String getPackageForToken(int userId, IBinder token) {
+        Log.i(PR_TAG,"AMS getPackageForToken");
         return mMainStack.getPackageForToken(userId, token);
     }
 
     @Override
     public ComponentName getActivityClassForToken(int userId, IBinder token) {
+        Log.i(PR_TAG,"AMS getActivityClassForToken");
         return mMainStack.getActivityClassForToken(userId, token);
     }
 
@@ -232,6 +248,7 @@ public class VActivityManagerService implements IActivityManager {
 
     @Override
     public IBinder acquireProviderClient(int userId, ProviderInfo info) {
+        Log.i(PR_TAG,"AMS acquireProviderClient");
         ProcessRecord callerApp;
         synchronized (mPidsSelfLocked) {
             callerApp = findProcessLocked(getCallingPid());
@@ -256,11 +273,13 @@ public class VActivityManagerService implements IActivityManager {
 
     @Override
     public ComponentName getCallingActivity(int userId, IBinder token) {
+        Log.i(PR_TAG,"AMS getCallingActivity");
         return mMainStack.getCallingActivity(userId, token);
     }
 
     @Override
     public String getCallingPackage(int userId, IBinder token) {
+        Log.i(PR_TAG,"AMS getCallingPackage");
         return mMainStack.getCallingPackage(userId, token);
     }
 
@@ -296,6 +315,7 @@ public class VActivityManagerService implements IActivityManager {
 
     @Override
     public ComponentName startService(IBinder caller, Intent service, String resolvedType, int userId) {
+        Log.i(PR_TAG,"AMS startService");
         synchronized (this) {
             return startServiceCommon(service, true, userId);
         }
@@ -303,6 +323,7 @@ public class VActivityManagerService implements IActivityManager {
 
     private ComponentName startServiceCommon(Intent service,
                                              boolean scheduleServiceArgs, int userId) {
+        Log.i(PR_TAG,"AMS startServiceCommon");
         ServiceInfo serviceInfo = resolveServiceInfo(service, userId);
         if (serviceInfo == null) {
             return null;
@@ -346,6 +367,7 @@ public class VActivityManagerService implements IActivityManager {
 
     @Override
     public int stopService(IBinder caller, Intent service, String resolvedType, int userId) {
+        Log.i(PR_TAG,"AMS stopService");
         synchronized (this) {
             ServiceInfo serviceInfo = resolveServiceInfo(service, userId);
             if (serviceInfo == null) {
@@ -362,6 +384,7 @@ public class VActivityManagerService implements IActivityManager {
 
     @Override
     public boolean stopServiceToken(ComponentName className, IBinder token, int startId, int userId) {
+        Log.i(PR_TAG,"AMS stopServiceToken");
         synchronized (this) {
             ServiceRecord r = (ServiceRecord) token;
             if (r != null && (r.startId == startId || startId == -1)) {
@@ -374,6 +397,7 @@ public class VActivityManagerService implements IActivityManager {
     }
 
     private void stopServiceCommon(ServiceRecord r, ComponentName className) {
+        Log.i(PR_TAG,"AMS stopServiceCommon");
         for (ServiceRecord.IntentBindRecord bindRecord : r.bindings) {
             for (IServiceConnection connection : bindRecord.connections) {
                 // Report to all of the connections that the service is no longer
@@ -406,6 +430,7 @@ public class VActivityManagerService implements IActivityManager {
     @Override
     public int bindService(IBinder caller, IBinder token, Intent service, String resolvedType,
                            IServiceConnection connection, int flags, int userId) {
+        Log.i(PR_TAG,"AMS bindService");
         synchronized (this) {
             ServiceInfo serviceInfo = resolveServiceInfo(service, userId);
             if (serviceInfo == null) {
@@ -450,6 +475,7 @@ public class VActivityManagerService implements IActivityManager {
 
     @Override
     public boolean unbindService(IServiceConnection connection, int userId) {
+        Log.i(PR_TAG,"AMS unbindService");
         synchronized (this) {
             ServiceRecord r = findRecordLocked(connection);
             if (r == null) {
@@ -484,6 +510,7 @@ public class VActivityManagerService implements IActivityManager {
 
     @Override
     public void unbindFinished(IBinder token, Intent service, boolean doRebind, int userId) {
+        Log.i(PR_TAG,"AMS unbindFinished");
         synchronized (this) {
             ServiceRecord r = (ServiceRecord) token;
             if (r != null) {
@@ -498,12 +525,14 @@ public class VActivityManagerService implements IActivityManager {
 
     @Override
     public boolean isVAServiceToken(IBinder token) {
+        Log.i(PR_TAG,"AMS isVAServiceToken");
         return token instanceof ServiceRecord;
     }
 
 
     @Override
     public void serviceDoneExecuting(IBinder token, int type, int startId, int res, int userId) {
+        Log.i(PR_TAG,"AMS serviceDoneExecuting");
         synchronized (this) {
             ServiceRecord r = (ServiceRecord) token;
             if (r == null) {
@@ -517,6 +546,7 @@ public class VActivityManagerService implements IActivityManager {
 
     @Override
     public IBinder peekService(Intent service, String resolvedType, int userId) {
+        Log.i(PR_TAG,"AMS peekService");
         synchronized (this) {
             ServiceInfo serviceInfo = resolveServiceInfo(service, userId);
             if (serviceInfo == null) {
@@ -535,6 +565,7 @@ public class VActivityManagerService implements IActivityManager {
 
     @Override
     public void publishService(IBinder token, Intent intent, IBinder service, int userId) {
+        Log.i(PR_TAG,"AMS publishService");
         synchronized (this) {
             ServiceRecord r = (ServiceRecord) token;
             if (r != null) {
@@ -565,6 +596,7 @@ public class VActivityManagerService implements IActivityManager {
 
     @Override
     public VParceledListSlice<ActivityManager.RunningServiceInfo> getServices(int maxNum, int flags, int userId) {
+        Log.i(PR_TAG,"AMS getServices");
         synchronized (mHistory) {
             List<ActivityManager.RunningServiceInfo> services = new ArrayList<>(mHistory.size());
             for (ServiceRecord r : mHistory) {
@@ -593,6 +625,7 @@ public class VActivityManagerService implements IActivityManager {
     @Override
     public void setServiceForeground(ComponentName className, IBinder token, int id, Notification notification,
                                      boolean removeNotification, int userId) {
+        Log.i(PR_TAG,"AMS setServiceForeground");
         ServiceRecord r = (ServiceRecord) token;
         if (r != null) {
             if (id != 0) {
@@ -637,6 +670,7 @@ public class VActivityManagerService implements IActivityManager {
 
     @Override
     public void processRestarted(String packageName, String processName, int userId) {
+        Log.i(PR_TAG,"AMS processRestarted");
         int callingPid = getCallingPid();
         int appId = VAppManagerService.get().getAppId(packageName);
         int uid = VUserHandle.getUid(userId, appId);
@@ -678,6 +712,7 @@ public class VActivityManagerService implements IActivityManager {
 
 
     private void attachClient(int pid, final IBinder clientBinder) {
+        Log.i(PR_TAG,"AMS attachClient");
         final IVClient client = IVClient.Stub.asInterface(clientBinder);
         if (client == null) {
             killProcess(pid);
@@ -736,11 +771,13 @@ public class VActivityManagerService implements IActivityManager {
 
     @Override
     public int getFreeStubCount() {
+        Log.i(PR_TAG,"AMS getFreeStubCount");
         return VASettings.STUB_COUNT - mPidsSelfLocked.size();
     }
 
     @Override
     public int initProcess(String packageName, String processName, int userId) {
+        Log.i(PR_TAG,"AMS initProcess");
         synchronized (this) {
             ProcessRecord r = startProcessIfNeedLocked(processName, userId, packageName);
             return r != null ? r.vpid : -1;
@@ -836,11 +873,13 @@ public class VActivityManagerService implements IActivityManager {
 
     @Override
     public boolean isAppProcess(String processName) {
+        Log.i(PR_TAG,"AMS isAppProcess");
         return parseVPid(processName) != -1;
     }
 
     @Override
     public boolean isAppPid(int pid) {
+        Log.i(PR_TAG,"AMS isAppPid");
         synchronized (mPidsSelfLocked) {
             return findProcessLocked(pid) != null;
         }
@@ -848,6 +887,7 @@ public class VActivityManagerService implements IActivityManager {
 
     @Override
     public String getAppProcessName(int pid) {
+        Log.i(PR_TAG,"AMS getAppProcessName");
         synchronized (mPidsSelfLocked) {
             ProcessRecord r = mPidsSelfLocked.get(pid);
             if (r != null) {
@@ -859,6 +899,7 @@ public class VActivityManagerService implements IActivityManager {
 
     @Override
     public List<String> getProcessPkgList(int pid) {
+        Log.i(PR_TAG,"AMS getProcessPkgList");
         synchronized (mPidsSelfLocked) {
             ProcessRecord r = mPidsSelfLocked.get(pid);
             if (r != null) {
@@ -870,6 +911,7 @@ public class VActivityManagerService implements IActivityManager {
 
     @Override
     public void killAllApps() {
+        Log.i(PR_TAG,"AMS killAllApps");
         synchronized (mPidsSelfLocked) {
             for (int i = 0; i < mPidsSelfLocked.size(); i++) {
                 ProcessRecord r = mPidsSelfLocked.valueAt(i);
@@ -880,6 +922,7 @@ public class VActivityManagerService implements IActivityManager {
 
     @Override
     public void killAppByPkg(final String pkg, int userId) {
+        Log.i(PR_TAG,"AMS killAppByPkg");
         synchronized (mProcessNames) {
             ArrayMap<String, SparseArray<ProcessRecord>> map = mProcessNames.getMap();
             int N = map.size();
@@ -902,6 +945,7 @@ public class VActivityManagerService implements IActivityManager {
 
     @Override
     public boolean isAppRunning(String packageName, int userId) {
+        Log.i(PR_TAG,"AMS isAppRunning");
         boolean running = false;
         synchronized (mPidsSelfLocked) {
             int N = mPidsSelfLocked.size();
@@ -918,6 +962,7 @@ public class VActivityManagerService implements IActivityManager {
 
     @Override
     public void killApplicationProcess(final String processName, int uid) {
+        Log.i(PR_TAG,"AMS killApplicationProcess");
         synchronized (mProcessNames) {
             ProcessRecord r = mProcessNames.get(processName, uid);
             if (r != null) {
@@ -933,6 +978,7 @@ public class VActivityManagerService implements IActivityManager {
 
     @Override
     public String getInitialPackage(int pid) {
+        Log.i(PR_TAG,"AMS getInitialPackage");
         synchronized (mPidsSelfLocked) {
             ProcessRecord r = mPidsSelfLocked.get(pid);
             if (r != null) {
@@ -945,10 +991,12 @@ public class VActivityManagerService implements IActivityManager {
     @Override
     public void handleApplicationCrash() {
         // Nothing
+        Log.i(PR_TAG,"AMS handleApplicationCrash");
     }
 
     @Override
     public void appDoneExecuting() {
+        Log.i(PR_TAG,"AMS appDoneExecuting");
         synchronized (mPidsSelfLocked) {
             ProcessRecord r = mPidsSelfLocked.get(getCallingPid());
             if (r != null) {
@@ -1094,11 +1142,13 @@ public class VActivityManagerService implements IActivityManager {
 
     @Override
     public void broadcastFinish(PendingResultData res) {
+        Log.i(PR_TAG,"AMS broadcastFinish");
         BroadcastSystem.get().broadcastFinish(res);
     }
 
     @Override
     public void notifyBadgerChange(BadgerInfo info) {
+        Log.i(PR_TAG,"AMS notifyBadgerChange");
         Intent intent = new Intent(VASettings.ACTION_BADGER_CHANGE);
         intent.putExtra("userId", info.userId);
         intent.putExtra("packageName", info.packageName);
